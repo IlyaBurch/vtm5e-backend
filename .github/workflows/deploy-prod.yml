@@ -1,27 +1,20 @@
-name: Deploy Backend
+name: Deploy Backend — Prod
 
 on:
   push:
     branches:
       - main
-      - staging
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Set environment name
-        id: env
-        run: |
-          if [ "${{ github.ref_name }}" = "main" ]; then
-            echo "name=prod" >> $GITHUB_OUTPUT
-          else
-            echo "name=staging" >> $GITHUB_OUTPUT
-          fi
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
@@ -35,15 +28,25 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/${{ github.repository }}:${{ steps.env.outputs.name }}
+          tags: ghcr.io/ilyaburch/vtm5e-charsheet/backend:latest
 
-      - name: Deploy to VPS
+      - name: Copy compose file to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: infra/prod/docker-compose.backend.yml
+          target: /opt/vtm5e/prod/
+          strip_components: 2
+
+      - name: Deploy on VPS
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            cd /opt/vtm5e/${{ steps.env.outputs.name }}
-            docker compose pull backend-${{ steps.env.outputs.name }}
-            docker compose up -d --no-deps backend-${{ steps.env.outputs.name }}
+            cd /opt/vtm5e/prod
+            docker compose -f docker-compose.backend.yml pull
+            docker compose -f docker-compose.backend.yml up -d

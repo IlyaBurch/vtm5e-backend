@@ -108,3 +108,4 @@ func (h *Handler) generateToken(userID string) (string, error) {
 func isInvalidCredentials(err error) bool {
 	return err != nil && err.Error() == "login: invalid credentials"
 }
+// еуые
