@@ -1,0 +1,17 @@
+# Production
+yourdomain.com {
+    reverse_proxy frontend-prod:80
+}
+
+api.yourdomain.com {
+    reverse_proxy backend-prod:3000
+}
+
+# Staging
+staging.yourdomain.com {
+    reverse_proxy frontend-staging:80
+}
+
+api.staging.yourdomain.com {
+    reverse_proxy backend-staging:3000
+}
