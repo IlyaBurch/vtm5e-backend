@@ -1,0 +1,54 @@
+# Положи этот файл в .github/workflows/deploy.yml фронтенд-репозитория
+name: Deploy Frontend
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set environment name and API URL
+        id: env
+        run: |
+          if [ "${{ github.ref_name }}" = "main" ]; then
+            echo "name=prod" >> $GITHUB_OUTPUT
+            echo "api_url=https://api.yourdomain.com" >> $GITHUB_OUTPUT
+          else
+            echo "name=staging" >> $GITHUB_OUTPUT
+            echo "api_url=https://api.staging.yourdomain.com" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/${{ github.repository }}:${{ steps.env.outputs.name }}
+          build-args: |
+            VITE_API_URL=${{ steps.env.outputs.api_url }}
+
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd /opt/vtm5e/${{ steps.env.outputs.name }}
+            docker compose pull frontend-${{ steps.env.outputs.name }}
+            docker compose up -d --no-deps frontend-${{ steps.env.outputs.name }}
