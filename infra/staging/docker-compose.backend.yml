@@ -1,0 +1,13 @@
+services:
+  backend-staging:
+    image: ghcr.io/ilyaburch/vtm5e-charsheet/backend:staging
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3000:3000"   # только localhost — nginx проксирует, снаружи не видно
+    env_file: .env.backend
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    external: true
