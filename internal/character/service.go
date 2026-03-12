@@ -34,11 +34,11 @@ func (s *Service) Get(ctx context.Context, id int, userID string) (*Character, e
 	return c, nil
 }
 
-func (s *Service) Create(ctx context.Context, userID, name string, data json.RawMessage) (*Character, error) {
-	return s.repo.Create(ctx, userID, name, data)
+func (s *Service) Create(ctx context.Context, userID, name, clan string, data json.RawMessage) (*Character, error) {
+	return s.repo.Create(ctx, userID, name, clan, data)
 }
 
-func (s *Service) Update(ctx context.Context, id int, userID, name string, data json.RawMessage) (*Character, error) {
+func (s *Service) Update(ctx context.Context, id int, userID, name, clan string, data json.RawMessage) (*Character, error) {
 	c, err := s.repo.GetByID(ctx, id)
 	if err != nil {
 		if isNotFound(err) {
@@ -49,7 +49,7 @@ func (s *Service) Update(ctx context.Context, id int, userID, name string, data 
 	if c.UserID != userID {
 		return nil, fmt.Errorf("forbidden")
 	}
-	return s.repo.Update(ctx, id, name, data)
+	return s.repo.Update(ctx, id, name, clan, data)
 }
 
 func (s *Service) Delete(ctx context.Context, id int, userID string) error {

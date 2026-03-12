@@ -57,6 +57,7 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 
 type characterRequest struct {
 	Name string          `json:"name"`
+	Clan string          `json:"clan"`
 	Data json.RawMessage `json:"data"`
 }
 
@@ -73,7 +74,7 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 
 	userID, _ := auth.UserIDFromContext(r.Context())
 
-	c, err := h.service.Create(r.Context(), userID, req.Name, req.Data)
+	c, err := h.service.Create(r.Context(), userID, req.Name, req.Clan, req.Data)
 	if err != nil {
 		response.WriteError(w, http.StatusInternalServerError, "failed to create character")
 		return
@@ -101,7 +102,7 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 
 	userID, _ := auth.UserIDFromContext(r.Context())
 
-	c, err := h.service.Update(r.Context(), id, userID, req.Name, req.Data)
+	c, err := h.service.Update(r.Context(), id, userID, req.Name, req.Clan, req.Data)
 	if err != nil {
 		switch err.Error() {
 		case "character not found":
