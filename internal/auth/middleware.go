@@ -1,17 +1,13 @@
 package auth
 
 import (
-	"context"
 	"net/http"
 	"strings"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/vtm5e/backend/internal/ctxutil"
 	"github.com/vtm5e/backend/internal/response"
 )
-
-type contextKey string
-
-const userIDKey contextKey = "userID"
 
 func Middleware(jwtSecret string) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
@@ -46,13 +42,8 @@ func Middleware(jwtSecret string) func(http.Handler) http.Handler {
 				return
 			}
 
-			ctx := context.WithValue(r.Context(), userIDKey, userID)
+			ctx := ctxutil.WithUserID(r.Context(), userID)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
-}
-
-func UserIDFromContext(ctx context.Context) (string, bool) {
-	id, ok := ctx.Value(userIDKey).(string)
-	return id, ok
 }

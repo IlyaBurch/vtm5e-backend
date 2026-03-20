@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/vtm5e/backend/internal/auth"
+	"github.com/vtm5e/backend/internal/ctxutil"
 	"github.com/vtm5e/backend/internal/response"
 )
 
@@ -19,7 +19,7 @@ func NewHandler(service *Service) *Handler {
 }
 
 func (h *Handler) List(w http.ResponseWriter, r *http.Request) {
-	userID, _ := auth.UserIDFromContext(r.Context())
+	userID, _ := ctxutil.UserIDFromContext(r.Context())
 
 	items, err := h.service.List(r.Context(), userID)
 	if err != nil {
@@ -37,7 +37,7 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userID, _ := auth.UserIDFromContext(r.Context())
+	userID, _ := ctxutil.UserIDFromContext(r.Context())
 
 	c, err := h.service.Get(r.Context(), id, userID)
 	if err != nil {
@@ -72,7 +72,7 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userID, _ := auth.UserIDFromContext(r.Context())
+	userID, _ := ctxutil.UserIDFromContext(r.Context())
 
 	c, err := h.service.Create(r.Context(), userID, req.Name, req.Clan, req.Data)
 	if err != nil {
@@ -100,7 +100,7 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userID, _ := auth.UserIDFromContext(r.Context())
+	userID, _ := ctxutil.UserIDFromContext(r.Context())
 
 	c, err := h.service.Update(r.Context(), id, userID, req.Name, req.Clan, req.Data)
 	if err != nil {
@@ -125,7 +125,7 @@ func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userID, _ := auth.UserIDFromContext(r.Context())
+	userID, _ := ctxutil.UserIDFromContext(r.Context())
 
 	if err := h.service.Delete(r.Context(), id, userID); err != nil {
 		switch err.Error() {

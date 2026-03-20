@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/vtm5e/backend/internal/ctxutil"
 	"github.com/vtm5e/backend/internal/response"
 )
 
@@ -17,7 +18,7 @@ func NewHandler(service *Service) *Handler {
 }
 
 func (h *Handler) Me(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id").(string)
+	userID, _ := ctxutil.UserIDFromContext(r.Context())
 
 	u, err := h.service.GetByID(r.Context(), userID)
 	if err != nil {
@@ -29,7 +30,7 @@ func (h *Handler) Me(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) UpdateMe(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id").(string)
+	userID, _ := ctxutil.UserIDFromContext(r.Context())
 
 	var req struct {
 		Username  *string `json:"username"`

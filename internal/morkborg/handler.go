@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/vtm5e/backend/internal/ctxutil"
 	"github.com/vtm5e/backend/internal/response"
 )
 
@@ -18,7 +19,7 @@ func NewHandler(service *Service) *Handler {
 }
 
 func (h *Handler) List(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id").(string)
+	userID, _ := ctxutil.UserIDFromContext(r.Context())
 
 	chars, err := h.service.List(r.Context(), userID)
 	if err != nil {
@@ -30,7 +31,7 @@ func (h *Handler) List(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id").(string)
+	userID, _ := ctxutil.UserIDFromContext(r.Context())
 
 	var req CreateRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -48,7 +49,7 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id").(string)
+	userID, _ := ctxutil.UserIDFromContext(r.Context())
 	id := chi.URLParam(r, "id")
 
 	c, err := h.service.Get(r.Context(), id, userID)
@@ -65,7 +66,7 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) Patch(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id").(string)
+	userID, _ := ctxutil.UserIDFromContext(r.Context())
 	id := chi.URLParam(r, "id")
 
 	var req PatchRequest
@@ -88,7 +89,7 @@ func (h *Handler) Patch(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id").(string)
+	userID, _ := ctxutil.UserIDFromContext(r.Context())
 	id := chi.URLParam(r, "id")
 
 	if err := h.service.Delete(r.Context(), id, userID); err != nil {
