@@ -1,13 +1,13 @@
 package user
 
-import (
-	"time"
-)
+import "time"
 
 type User struct {
 	ID           string    `json:"id"`
 	Email        string    `json:"email"`
-	Username     string    `json:"username"`
-	PasswordHash string    `json:"-"`
-	CreatedAt    time.Time `json:"created_at"`
+	Username     *string   `json:"username"`
+	AvatarURL    *string   `json:"avatarUrl"`
+	GoogleID     *string   `json:"-"`
+	PasswordHash *string   `json:"-"`
+	CreatedAt    time.Time `json:"createdAt"`
 }

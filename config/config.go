@@ -7,17 +7,25 @@ import (
 )
 
 type Config struct {
-	DatabaseURL    string
-	JWTSecret      string
-	Port           string
-	AllowedOrigins []string
+	DatabaseURL          string
+	JWTSecret            string
+	Port                 string
+	AllowedOrigins       []string
+	GoogleClientID       string
+	GoogleClientSecret   string
+	GoogleCallbackURL    string
+	FrontendURL          string
 }
 
 func Load() (*Config, error) {
 	cfg := &Config{
-		DatabaseURL: os.Getenv("DATABASE_URL"),
-		JWTSecret:   os.Getenv("JWT_SECRET"),
-		Port:        os.Getenv("PORT"),
+		DatabaseURL:        os.Getenv("DATABASE_URL"),
+		JWTSecret:          os.Getenv("JWT_SECRET"),
+		Port:               os.Getenv("PORT"),
+		GoogleClientID:     os.Getenv("GOOGLE_CLIENT_ID"),
+		GoogleClientSecret: os.Getenv("GOOGLE_CLIENT_SECRET"),
+		GoogleCallbackURL:  os.Getenv("GOOGLE_CALLBACK_URL"),
+		FrontendURL:        os.Getenv("FRONTEND_URL"),
 	}
 
 	if cfg.DatabaseURL == "" {
@@ -35,6 +43,10 @@ func Load() (*Config, error) {
 		cfg.AllowedOrigins = []string{"http://localhost:5173"}
 	} else {
 		cfg.AllowedOrigins = strings.Split(allowedOrigin, ",")
+	}
+
+	if cfg.FrontendURL == "" {
+		cfg.FrontendURL = "http://localhost:5173"
 	}
 
 	return cfg, nil

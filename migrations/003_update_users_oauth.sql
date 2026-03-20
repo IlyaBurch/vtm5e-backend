@@ -1,0 +1,7 @@
+ALTER TABLE users ALTER COLUMN username DROP NOT NULL;
+ALTER TABLE users ALTER COLUMN username DROP DEFAULT;
+UPDATE users SET username = NULL WHERE username = '';
+ALTER TABLE users ADD CONSTRAINT users_username_unique UNIQUE (username);
+
+ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url TEXT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS google_id  TEXT UNIQUE;

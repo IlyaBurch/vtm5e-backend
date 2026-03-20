@@ -17,6 +17,7 @@ import (
 	"github.com/vtm5e/backend/internal/auth"
 	"github.com/vtm5e/backend/internal/character"
 	"github.com/vtm5e/backend/internal/db"
+	"github.com/vtm5e/backend/internal/morkborg"
 	"github.com/vtm5e/backend/internal/user"
 )
 
@@ -42,11 +43,18 @@ func main() {
 
 	userRepo := user.NewRepository(pool)
 	userService := user.NewService(userRepo)
-	authHandler := auth.NewHandler(userService, cfg.JWTSecret)
+	userHandler := user.NewHandler(userService)
+
+	oauthConfig := auth.NewOAuthConfig(cfg.GoogleClientID, cfg.GoogleClientSecret, cfg.GoogleCallbackURL)
+	authHandler := auth.NewHandler(userService, cfg.JWTSecret, oauthConfig, cfg.FrontendURL)
 
 	charRepo := character.NewRepository(pool)
 	charService := character.NewService(charRepo)
 	charHandler := character.NewHandler(charService)
+
+	mbRepo := morkborg.NewRepository(pool)
+	mbService := morkborg.NewService(mbRepo)
+	mbHandler := morkborg.NewHandler(mbService)
 
 	r := chi.NewRouter()
 
@@ -59,7 +67,7 @@ func main() {
 
 	corsMiddleware := cors.New(cors.Options{
 		AllowedOrigins:   cfg.AllowedOrigins,
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Authorization", "Content-Type"},
 		AllowCredentials: true,
 	})
@@ -69,6 +77,14 @@ func main() {
 		r.Route("/auth", func(r chi.Router) {
 			r.Post("/register", authHandler.Register)
 			r.Post("/login", authHandler.Login)
+			r.Get("/google", authHandler.GoogleLogin)
+			r.Get("/google/callback", authHandler.GoogleCallback)
+		})
+
+		r.Route("/user", func(r chi.Router) {
+			r.Use(auth.Middleware(cfg.JWTSecret))
+			r.Get("/me", userHandler.Me)
+			r.Patch("/me", userHandler.UpdateMe)
 		})
 
 		r.Route("/characters", func(r chi.Router) {
@@ -78,6 +94,15 @@ func main() {
 			r.Get("/{id}", charHandler.Get)
 			r.Put("/{id}", charHandler.Update)
 			r.Delete("/{id}", charHandler.Delete)
+		})
+
+		r.Route("/morkborg/characters", func(r chi.Router) {
+			r.Use(auth.Middleware(cfg.JWTSecret))
+			r.Get("/", mbHandler.List)
+			r.Post("/", mbHandler.Create)
+			r.Get("/{id}", mbHandler.Get)
+			r.Patch("/{id}", mbHandler.Patch)
+			r.Delete("/{id}", mbHandler.Delete)
 		})
 	})
 
@@ -94,6 +119,5 @@ func migrationsPath() string {
 	if !ok {
 		return "migrations"
 	}
-	// cmd/server/main.go -> ../../migrations
 	return filepath.Join(filepath.Dir(filename), "..", "..", "migrations")
 }
