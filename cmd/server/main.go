@@ -58,7 +58,7 @@ func main() {
 	r.Use(chimiddleware.Timeout(30 * time.Second))
 
 	corsMiddleware := cors.New(cors.Options{
-		AllowedOrigins:   []string{cfg.AllowedOrigin},
+		AllowedOrigins:   cfg.AllowedOrigins,
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Authorization", "Content-Type"},
 		AllowCredentials: true,

@@ -3,21 +3,21 @@ package config
 import (
 	"fmt"
 	"os"
+	"strings"
 )
 
 type Config struct {
 	DatabaseURL    string
 	JWTSecret      string
 	Port           string
-	AllowedOrigin  string
+	AllowedOrigins []string
 }
 
 func Load() (*Config, error) {
 	cfg := &Config{
-		DatabaseURL:   os.Getenv("DATABASE_URL"),
-		JWTSecret:     os.Getenv("JWT_SECRET"),
-		Port:          os.Getenv("PORT"),
-		AllowedOrigin: os.Getenv("ALLOWED_ORIGIN"),
+		DatabaseURL: os.Getenv("DATABASE_URL"),
+		JWTSecret:   os.Getenv("JWT_SECRET"),
+		Port:        os.Getenv("PORT"),
 	}
 
 	if cfg.DatabaseURL == "" {
@@ -29,8 +29,12 @@ func Load() (*Config, error) {
 	if cfg.Port == "" {
 		cfg.Port = "3000"
 	}
-	if cfg.AllowedOrigin == "" {
-		cfg.AllowedOrigin = "http://localhost:5173"
+
+	allowedOrigin := os.Getenv("ALLOWED_ORIGIN")
+	if allowedOrigin == "" {
+		cfg.AllowedOrigins = []string{"http://localhost:5173"}
+	} else {
+		cfg.AllowedOrigins = strings.Split(allowedOrigin, ",")
 	}
 
 	return cfg, nil
