@@ -24,6 +24,7 @@ func NewHandler(userService *user.Service, jwtSecret string) *Handler {
 type authRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
+	Username string `json:"username"`
 }
 
 type authResponse struct {
@@ -32,8 +33,9 @@ type authResponse struct {
 }
 
 type userInfo struct {
-	ID    string `json:"id"`
-	Email string `json:"email"`
+	ID       string `json:"id"`
+	Email    string `json:"email"`
+	Username string `json:"username"`
 }
 
 func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
@@ -48,7 +50,7 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u, err := h.userService.Register(r.Context(), req.Email, req.Password)
+	u, err := h.userService.Register(r.Context(), req.Email, req.Password, req.Username)
 	if err != nil {
 		response.WriteError(w, http.StatusConflict, "email already in use")
 		return
@@ -62,7 +64,7 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 
 	response.WriteJSON(w, http.StatusCreated, authResponse{
 		Token: token,
-		User:  &userInfo{ID: u.ID, Email: u.Email},
+		User:  &userInfo{ID: u.ID, Email: u.Email, Username: u.Username},
 	})
 }
 
@@ -91,7 +93,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 
 	response.WriteJSON(w, http.StatusOK, authResponse{
 		Token: token,
-		User:  &userInfo{ID: u.ID, Email: u.Email},
+		User:  &userInfo{ID: u.ID, Email: u.Email, Username: u.Username},
 	})
 }
 

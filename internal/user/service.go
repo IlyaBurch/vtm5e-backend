@@ -15,13 +15,13 @@ func NewService(repo *Repository) *Service {
 	return &Service{repo: repo}
 }
 
-func (s *Service) Register(ctx context.Context, email, password string) (*User, error) {
+func (s *Service) Register(ctx context.Context, email, password, username string) (*User, error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return nil, fmt.Errorf("hash password: %w", err)
 	}
 
-	u, err := s.repo.Create(ctx, email, string(hash))
+	u, err := s.repo.Create(ctx, email, string(hash), username)
 	if err != nil {
 		return nil, fmt.Errorf("register user: %w", err)
 	}
